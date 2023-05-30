@@ -1,7 +1,8 @@
 #include "library.h"
+#include "string_tools.h"
 
 #define NUM_CHARS 256
-
+#define BUFFER_SIZE 50
 //각 배열의 원소마다 시작 문자가 같은 artist끼리 저장된다
 Artist *artist_directory[NUM_CHARS];
 int num_index = 0;
@@ -14,6 +15,36 @@ Artist *find_artist(char *name);
 void init() {
 	for (int i = 0; i < NUM_CHARS; i++)
 		artist_directory[i] = NULL;
+}
+
+void load(FILE *fp) {
+	char buffer[BUFFER_SIZE];
+	char *artist, *title, *path;
+
+	while (1) {
+		if (read_line(fp, buffer, BUFFER_SIZE) <= 0)
+			break;
+
+		artist = strtok(buffer, "#");
+		if (!strcmp(artist, " "))
+			artist = NULL;
+		else
+			artist = _strdup(artist);
+
+		title = strtok(NULL, "#");
+		if (!strcmp(title, " "))
+			title = NULL;
+		else
+			title = _strdup(title);
+
+		path = strtok(NULL, "#");
+		if (!strcmp(path, " "))
+			path = NULL;
+		else
+			path = _strdup(path);
+
+		printf("%s %s %s\n", artist, title, path);
+	}
 }
 
 //artist 객체 생성
@@ -82,6 +113,8 @@ void add_song(char *artist, char* title, char *path) {
 	}
 
 	Song *ptr_song = create_song_instance(ptr_artist, title, path);
+
+	//SNode 객체 생성 및 초기화
 	SNode *ptr_snode = (SNode *)malloc(sizeof(SNode));
 	ptr_snode->song = ptr_song;
 	ptr_snode->prev = NULL;
@@ -97,25 +130,21 @@ void insert_node(Artist *ptr_artist, SNode *ptr_snode) {
 		p = p->next;
 
 	//add ptr_snode before p
-	//1. empty
-	//2. 맨 처음
-	//3. 맨 끝
-	//4. 일반적
-	if (ptr_artist->head == NULL) { //1
+	if (ptr_artist->head == NULL) { //1. empty
 		ptr_artist->head = ptr_snode;
 		ptr_artist->tail = ptr_snode;
 	}
-	else if (p == ptr_artist->head) { //2
+	else if (p == ptr_artist->head) { //2. 맨 처음
 		ptr_snode->next = ptr_artist->head;
 		ptr_artist->head->prev = ptr_snode;
 		ptr_artist->head = ptr_snode;
 	}
-	else if(p == NULL){ //3
+	else if(p == NULL){ //3. 맨 끝
 		ptr_snode->prev = ptr_artist->tail;
 		ptr_artist->tail->next = ptr_snode;
 		ptr_artist->tail = ptr_snode;
 	}
-	else { //4
+	else { //4. 일반적
 		ptr_snode->prev = p->prev;
 		ptr_snode->next = p;
 		p->prev->next = ptr_snode;

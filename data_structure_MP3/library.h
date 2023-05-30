@@ -1,3 +1,4 @@
+#pragma warning (disable:4996)
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +29,7 @@ struct artist { //artist 구조체 - 가수 정보를 담는 연결리스트
 void init();
 void add_song(char *artist, char *title, char *path);
 void status();
-
+void load(FILE *fp);
 
 //void initialize();
 //void search_song(char *name);
