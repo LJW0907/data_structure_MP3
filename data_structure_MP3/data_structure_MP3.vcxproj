@@ -143,6 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="library.c" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="string_tools.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="library.h" />
+    <ClInclude Include="string_tools.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
