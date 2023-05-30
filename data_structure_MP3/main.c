@@ -46,6 +46,8 @@ void process_command() {
 		else if (!strcmp(command, "save"))
 			handle_save();
 		*/
+		else if (!strcmp(command, "status"))
+			status();
 		else if (!strcmp(command, "exit"))
 			break;
 	}
