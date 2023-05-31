@@ -44,6 +44,7 @@ void load(FILE *fp) {
 			path = _strdup(path);
 
 		printf("%s %s %s\n", artist, title, path);
+		add_song(artist, title, path);
 	}
 }
 
@@ -190,10 +191,33 @@ void print_song(Song *ptr_song) {
 	printf("	%d: %s, %s\n", ptr_song->index, ptr_song->title, ptr_song->path);
 }
 
-//
-//void find_song() {
-//
-//}
+
+void find_song(char *artist, char *title) {
+	Artist *ptr_artist = find_artist(artist);
+
+	if (ptr_artist == NULL) {
+		printf("No such artist exists\n");
+		return;
+	}
+		
+	if (title == NULL) {
+		printf("Found:\n");
+		print_artist(ptr_artist);
+	}
+	else {
+		SNode *ptr_snode = ptr_artist->head;
+		while (ptr_snode != NULL && strcmp(ptr_snode->song->title, title) < 0)
+			ptr_snode = ptr_snode->next;
+
+		if (ptr_snode != NULL && !strcmp(ptr_snode->song->title, title)) {
+			printf("Found:\n");
+			printf("%s\n", ptr_artist->name);
+			print_song(ptr_snode->song);
+		}
+		else
+			printf("No such song exists\n");
+	}
+}
 //
 //int remove_song() {
 //

@@ -28,6 +28,7 @@ struct artist { //artist 구조체 - 가수 정보를 담는 연결리스트
 
 void init();
 void add_song(char *artist, char *title, char *path);
+void find_song(char *artist, char *title);
 void status();
 void load(FILE *fp);
 
