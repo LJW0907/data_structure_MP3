@@ -32,6 +32,7 @@ void find_song(char *artist, char *title);
 void play(int id_str);
 void status();
 void load(FILE *fp);
+void save(FILE *fp);
 
 //void initialize();
 //void search_song(char *name);

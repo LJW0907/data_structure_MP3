@@ -15,6 +15,7 @@ void handle_add();
 void handle_search();
 void handle_play();
 void handle_load();
+void handle_save();
 
 int main() {
 	init();
@@ -62,9 +63,9 @@ void process_command() {
 			handle_play();
 		/*else if (!strcmp(command, "remove"))
 			handle_remove();
+		*/
 		else if (!strcmp(command, "save"))
 			handle_save();
-		*/
 		else if (!strcmp(command, "status"))
 			status();
 		else if (!strcmp(command, "exit"))
@@ -120,4 +121,12 @@ void handle_play() {
 	int index = atoi(id_str);
 
 	play(index);
+}
+
+void handle_save() {
+	char *file_name = strtok(NULL, " ");
+	FILE *fp = fopen(file_name, "w");
+
+	save(fp);
+	fclose(fp);
 }

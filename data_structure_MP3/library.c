@@ -1,5 +1,6 @@
 #include "library.h"
 #include "string_tools.h"
+//#include <windows>
 
 #define NUM_CHARS 256
 #define SIZE_INDEX_TABLE 100
@@ -14,6 +15,8 @@ void insert_node(Artist *ptr_artist, SNode *ptr_snode);
 void insert_to_index_directory(Song *ptr_song);
 void print_artist(Artist *p);
 void print_song(Song *ptr_song);
+void save_artist(Artist *p, FILE *fp);
+void save_song(Song *ptr_song, FILE *fp);
 Artist *find_artist(char *name);
 SNode *find_snode(Artist *ptr_artist, char *title);
 SNode *find_song_id(int index);
@@ -24,37 +27,6 @@ void init() {
 
 	for (int i = 0; i < SIZE_INDEX_TABLE; i++)
 		index_directory[i] = NULL;
-}
-
-void load(FILE *fp) {
-	char buffer[BUFFER_SIZE];
-	char *artist, *title, *path;
-
-	while (1) {
-		if (read_line(fp, buffer, BUFFER_SIZE) <= 0)
-			break;
-
-		artist = strtok(buffer, "#");
-		if (!strcmp(artist, " "))
-			artist = NULL;
-		else
-			artist = _strdup(artist);
-
-		title = strtok(NULL, "#");
-		if (!strcmp(title, " "))
-			title = NULL;
-		else
-			title = _strdup(title);
-
-		path = strtok(NULL, "#");
-		if (!strcmp(path, " "))
-			path = NULL;
-		else
-			path = _strdup(path);
-
-		printf("%s %s %s\n", artist, title, path);
-		add_song(artist, title, path);
-	}
 }
 
 //artist 객체 생성
@@ -203,14 +175,13 @@ Artist *find_artist(char *name) {
 }
 
 void status() {
-	for(int i = 0; i < NUM_CHARS; i++)
-		if (artist_directory[i] != NULL) {
+	for(int i = 0; i < NUM_CHARS; i++){
 			Artist *p = artist_directory[i];
 			while (p != NULL) {
 				print_artist(p);
 				p = p->next;
 			}
-		}
+	}
 }
 
 void print_artist(Artist *p) {
@@ -285,7 +256,68 @@ void play(int index) {
 		printf("No such song exists.\n");
 	}
 
-	printf("Found the song: %s", ptr_snode->song->title);
+	printf("Found the song: %s\n", ptr_snode->song->title);
+
+	//실제 컴퓨터 해당 경로 내에서 mp3를 트는 방법(windows 라이브러리 사용)
+	//shellExecute(GetDesktopWindow(), "open", ptr_snode->song->path, NULL, NULL, SW_SHOW);
+}
+
+void load(FILE *fp) {
+	char buffer[BUFFER_SIZE];
+	char *artist, *title, *path;
+
+	while (1) {
+		if (read_line(fp, buffer, BUFFER_SIZE) <= 0)
+			break;
+
+		artist = strtok(buffer, "#");
+		if (!strcmp(artist, " "))
+			artist = NULL;
+		else
+			artist = _strdup(artist);
+
+		title = strtok(NULL, "#");
+		if (!strcmp(title, " "))
+			title = NULL;
+		else
+			title = _strdup(title);
+
+		path = strtok(NULL, "#");
+		if (!strcmp(path, " "))
+			path = NULL;
+		else
+			path = _strdup(path);
+
+		printf("%s %s %s\n", artist, title, path);
+		add_song(artist, title, path);
+	}
+}
+
+void save(FILE *fp) {
+	for (int i = 0; i < NUM_CHARS; i++){
+			Artist *p = artist_directory[i];
+			while (p != NULL) {
+				save_artist(p, fp);
+				p = p->next;
+			}
+	}
+}
+
+void save_artist(Artist *p, FILE *fp) {
+	SNode *ptr_snode = p->head;
+	while (ptr_snode != NULL) {
+		save_song(ptr_snode->song, fp);
+		ptr_snode = ptr_snode->next;
+	}
+}
+
+void save_song(Song *ptr_song, FILE *fp) {
+	fprintf(fp, "%s#", ptr_song->artist->name);
+	fprintf(fp, "%s#", ptr_song->title);
+	if (ptr_song->path != NULL)
+		fprintf(fp, "%s#\n", ptr_song->path);
+	else
+		fprintf(fp, " #\n");
 }
 
 //
