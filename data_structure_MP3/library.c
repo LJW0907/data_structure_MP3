@@ -2,19 +2,28 @@
 #include "string_tools.h"
 
 #define NUM_CHARS 256
+#define SIZE_INDEX_TABLE 100
 #define BUFFER_SIZE 50
 //각 배열의 원소마다 시작 문자가 같은 artist끼리 저장된다
 Artist *artist_directory[NUM_CHARS];
 int num_index = 0;
+//play 기능에선 index를 기준으로 시행한다. 그걸 최적화하기 위해 index_directory 배열 선언
+SNode *index_directory[SIZE_INDEX_TABLE];
 
 void insert_node(Artist *ptr_artist, SNode *ptr_snode);
+void insert_to_index_directory(Song *ptr_song);
 void print_artist(Artist *p);
 void print_song(Song *ptr_song);
 Artist *find_artist(char *name);
+SNode *find_snode(Artist *ptr_artist, char *title);
+SNode *find_song_id(int index);
 
 void init() {
 	for (int i = 0; i < NUM_CHARS; i++)
 		artist_directory[i] = NULL;
+
+	for (int i = 0; i < SIZE_INDEX_TABLE; i++)
+		index_directory[i] = NULL;
 }
 
 void load(FILE *fp) {
@@ -123,6 +132,7 @@ void add_song(char *artist, char* title, char *path) {
 	
 	//snode를 artist에 저장
 	insert_node(ptr_artist, ptr_snode);
+	insert_to_index_directory(ptr_song);
 }
 
 void insert_node(Artist *ptr_artist, SNode *ptr_snode) {
@@ -151,6 +161,33 @@ void insert_node(Artist *ptr_artist, SNode *ptr_snode) {
 		p->prev->next = ptr_snode;
 		p->prev = ptr_snode;
 	}
+}
+
+void insert_to_index_directory(Song *ptr_song) {
+	SNode *ptr_snode = (SNode *)malloc(sizeof(SNode));
+	ptr_snode->song = ptr_song;
+	ptr_snode->next = NULL; 
+	ptr_snode->prev = NULL; //unused
+
+	int index = ptr_song->index % SIZE_INDEX_TABLE;
+
+	//add the snode into single linked list index_table[index]
+	SNode *p = index_directory[index];
+	SNode *q = NULL;
+	while (p != NULL && strcmp(p->song->title, ptr_song->title) < 0) {
+		q = p;
+		p = p->next;
+	}
+	
+	if (q == NULL) {//add_first
+		ptr_snode->next = p;
+		index_directory[index] = ptr_snode;
+ 	}
+	else { //add after q
+		ptr_snode->next = p;
+		q->next = ptr_snode;
+	}
+		
 }
 
 Artist *find_artist(char *name) {
@@ -205,19 +242,52 @@ void find_song(char *artist, char *title) {
 		print_artist(ptr_artist);
 	}
 	else {
-		SNode *ptr_snode = ptr_artist->head;
-		while (ptr_snode != NULL && strcmp(ptr_snode->song->title, title) < 0)
-			ptr_snode = ptr_snode->next;
+		SNode *ptr_snode = find_snode(ptr_artist, title);
 
-		if (ptr_snode != NULL && !strcmp(ptr_snode->song->title, title)) {
+		if (ptr_snode != NULL) {
 			printf("Found:\n");
 			printf("%s\n", ptr_artist->name);
 			print_song(ptr_snode->song);
 		}
-		else
+		else {
 			printf("No such song exists\n");
+		}
 	}
 }
+
+//ptr_artist에서 title이라는 이름의 song을 가진 snode 찾아서 반환
+SNode *find_snode(Artist *ptr_artist, char *title) {
+	SNode *ptr_snode = ptr_artist->head;
+
+	while (ptr_snode != NULL && strcmp(ptr_snode->song->title, title) < 0)
+		ptr_snode = ptr_snode->next;
+
+	if (ptr_snode != NULL && !strcmp(ptr_snode->song->title, title)) {
+		return ptr_snode;
+	}
+	else {
+		return NULL;
+	}
+}
+
+SNode *find_song_id(int index) {
+	SNode *ptr_snode = index_directory[index%SIZE_INDEX_TABLE];
+
+	while (ptr_snode != NULL && ptr_snode->song->index != index)
+		ptr_snode = ptr_snode->next;
+
+	return ptr_snode;
+}
+
+void play(int index) {
+	SNode *ptr_snode = find_song_id(index);
+	if (ptr_snode == NULL) {
+		printf("No such song exists.\n");
+	}
+
+	printf("Found the song: %s", ptr_snode->song->title);
+}
+
 //
 //int remove_song() {
 //

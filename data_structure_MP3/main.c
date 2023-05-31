@@ -13,6 +13,7 @@
 void process_command();
 void handle_add();
 void handle_search();
+void handle_play();
 void handle_load();
 
 int main() {
@@ -57,13 +58,9 @@ void process_command() {
 			handle_add();
 		else if (!strcmp(command, "search"))
 			handle_search();
-		/*else if (!strcmp(command, "remove"))
-			handle_remove();
-		else if (!strcmp(command, "status"))
-			handle_status();
 		else if (!strcmp(command, "play"))
 			handle_play();
-		else if (!strcmp(command, "remove"))
+		/*else if (!strcmp(command, "remove"))
 			handle_remove();
 		else if (!strcmp(command, "save"))
 			handle_save();
@@ -116,4 +113,11 @@ void handle_search() {
 		title = _strdup(buffer);
 
 	find_song(artist, title);
+}
+
+void handle_play() {
+	char *id_str = strtok(NULL, " ");
+	int index = atoi(id_str);
+
+	play(index);
 }
